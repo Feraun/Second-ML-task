@@ -1,0 +1,7 @@
+python-dotenv
+fastapi
+dotenv
+
+loguru
+sqlalchemy
+pandas
