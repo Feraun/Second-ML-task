@@ -1,17 +1,10 @@
 import time
-
 from loguru import logger
-from sqlalchemy import create_engine
-from config import *
+from db import engine
 
 def save_to_db(df):
 
     start = time.time()
-
-    engine = create_engine(
-        f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
-        f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-    )
 
     df.to_sql(
         "products",

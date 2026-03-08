@@ -5,3 +5,5 @@ dotenv
 loguru
 sqlalchemy
 pandas
+scikit-learn
+numpy
