@@ -7,8 +7,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 import numpy as np
 
-from read_df_from_db import *
-
 def predict_price_by_linear_regression(df):
 
     #делаем столбец числовым
@@ -38,14 +36,14 @@ def predict_price_by_linear_regression(df):
     # plt.ylabel("Цена")
     # plt.show()
 
-    #вытаскиваем категориальные и числовые столбцы, как массивы
+    #вытаскиваем категориальные и числовые столбцы, как Series
     categorical = x.select_dtypes(include=["object", "string"]).columns.tolist()
     numeric = x.select_dtypes(exclude=["object", "string"]).columns.tolist()
 
-    print("categorical:", categorical)
-    print("numeric:", numeric)
+    # print("categorical:", categorical)
+    # print("numeric:", numeric)
 
-    #обработчик массивов
+    #обработчик Series'ов
     preprocessor = make_column_transformer(
         (OneHotEncoder(handle_unknown="ignore"), categorical),
         (MinMaxScaler(), numeric)
@@ -57,9 +55,8 @@ def predict_price_by_linear_regression(df):
     ])
 
     # обучение
-    # трансформер получает X_train и y_train, делает fit и
-    # transform → возвращает преобразованный x.
-    # Последний шаг(модель) получает x и y_train, делает fit — обучает модель.
+    # трансформер получает x_train, делает fit и возвращает преобразованный x.
+    # модель получает x и y_train, делает fit — обучает модель.
     lr_pipeline.fit(x_train, y_train)
 
     # уже обученная модель предсказывает цены
@@ -69,6 +66,3 @@ def predict_price_by_linear_regression(df):
     #корень из средней квадратичной ошибки
     rmse = np.sqrt(mean_squared_error(y_test, lr_pred))
     print("LinearRegression RMSE:", rmse)
-
-df = read_df_from_db()
-predict_price_by_linear_regression(df)
