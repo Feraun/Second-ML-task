@@ -7,3 +7,5 @@ sqlalchemy
 pandas
 scikit-learn
 numpy
+boto3
+botocore
