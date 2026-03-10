@@ -1,7 +1,6 @@
 python-dotenv
 fastapi
 dotenv
-
 loguru
 sqlalchemy
 pandas
@@ -9,3 +8,7 @@ scikit-learn
 numpy
 boto3
 botocore
+psycopg
+psycopg-binary
+apscheduler
+openpyxl
