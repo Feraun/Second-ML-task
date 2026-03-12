@@ -6,7 +6,6 @@ import xml.etree.ElementTree as ET
 
 from loguru import logger
 
-
 def load_products_from_feed(xml_file: str) -> pd.DataFrame:
 
     start = time.time()

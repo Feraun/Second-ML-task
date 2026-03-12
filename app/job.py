@@ -1,6 +1,6 @@
 import time
 from app.downloader_feed import download_feed
-from app.parser_fedd import load_products_from_feed
+from app.parser_feed import load_products_from_feed
 from app.save_to_db import save_to_db
 from loguru import logger
 

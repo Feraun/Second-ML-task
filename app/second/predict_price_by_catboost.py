@@ -1,27 +1,17 @@
 from datetime import datetime
 import pandas as pd
 from catboost import CatBoostRegressor
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import numpy as np
-
 from minio import S3BucketService
 
 
-def predict_price_by_catboost(df, configs, s3service: S3BucketService):
+def predict_price_by_catboost(x_train, x_test, y_train, y_test, configs, s3service: S3BucketService):
 
+    categorical = x_train.select_dtypes(include=["object", "string"]).columns.tolist()
 
-    x = df.drop(columns=["price"])
-
-    y = df["price"]
-
-    x = x.fillna("unknown")
-
-    x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=0.1, random_state=42
-    )
-
-    categorical = x.select_dtypes(include=["object", "string"]).columns.tolist()
+    x_train[categorical] = x_train[categorical].fillna("unknown")
+    x_test[categorical] = x_test[categorical].fillna("unknown")
 
     results = []
 

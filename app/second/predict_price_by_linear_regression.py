@@ -1,7 +1,4 @@
-from datetime import datetime
-import pickle
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import train_test_split
 from sklearn.compose import make_column_transformer
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.pipeline import Pipeline
@@ -9,45 +6,40 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 import numpy as np
 
-from minio import S3BucketService
+from app.second.difference_df_train_and_test import difference_df_train_and_test
+from app.second.read_df_from_db import read_df_from_db
 
-def predict_price_by_linear_regression(df):
+def predict_price_by_linear_regression(
+    x_train,
+    x_test,
+    y_train,
+    y_test):
 
     #делаем столбец числовым
-    df["Суммарная мощность"] = df["Суммарная мощность"].str.replace(r"[^\d.]", "", regex=True).astype(float)
-
-    #заполняем пустые значения
-    myImputer = SimpleImputer(strategy='constant', fill_value=0)
-
-    df[["Суммарная мощность"]] = myImputer.fit_transform(df[["Суммарная мощность"]])
-
-    # датафрейм без столбца price
-    x = df.drop(columns=["price"])
-
-    # массив из прайсов
-    y = df["price"]
-
-    #названия столбцов делаем строками
-    x.columns = [str(c) for c in x.columns]
-
-    print(df)
-
-    #разбиваем на дфы и массивы для обучения и тестирования
-    x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=0.1, random_state=42
-    )
+    x_train["Суммарная мощность"] = x_train["Суммарная мощность"].str.replace(r"[^\d.]", "", regex=True).astype(float)
+    x_test["Суммарная мощность"] = x_test["Суммарная мощность"].str.replace(r"[^\d.]", "", regex=True).astype(float)
 
     #вытаскиваем категориальные и числовые столбцы, как Series
-    categorical = x.select_dtypes(include=["object", "string"]).columns.tolist()
-    numeric = x.select_dtypes(exclude=["object", "string"]).columns.tolist()
+    categorical = x_train.select_dtypes(include=["object", "string"]).columns.tolist()
+    numeric = x_train.select_dtypes(exclude=["object", "string"]).columns.tolist()
 
     # print("categorical:", categorical)
     # print("numeric:", numeric)
 
     #обработчик Series'ов
     preprocessor = make_column_transformer(
-        (OneHotEncoder(handle_unknown="ignore"), categorical),
-        (MinMaxScaler(), numeric)
+
+(Pipeline([
+                ("imputer", SimpleImputer(strategy="constant", fill_value="unknown")),
+                ("onehot-encoder", OneHotEncoder(handle_unknown="ignore"))
+        ]),
+        categorical),
+
+        (Pipeline([
+                ("imputer", SimpleImputer(strategy="constant", fill_value=0)),
+                ("scaler", MinMaxScaler())
+        ]),
+        numeric)
     )
 
     lr_pipeline = Pipeline([
@@ -66,4 +58,9 @@ def predict_price_by_linear_regression(df):
 
     #корень из средней квадратичной ошибки
     rmse = np.sqrt(mean_squared_error(y_test, lr_pred))
-    return [rmse, x_train, x_test, lr_pipeline]
+    return [rmse, lr_pipeline]
+
+# df = read_df_from_db()
+# x_train, x_test, y_train, y_test = difference_df_train_and_test(df)
+# pred_by_LR = predict_price_by_linear_regression(x_train, x_test, y_train, y_test)
+# print(pred_by_LR[0])

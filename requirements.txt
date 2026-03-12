@@ -12,3 +12,4 @@ psycopg
 psycopg-binary
 apscheduler
 openpyxl
+catboost
