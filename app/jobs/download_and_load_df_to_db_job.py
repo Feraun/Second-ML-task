@@ -1,7 +1,7 @@
 import time
-from app.downloader_feed import download_feed
-from app.parser_feed import load_products_from_feed
-from app.save_to_db import save_to_db
+from app.utils.downloader_feed import download_feed
+from app.utils.parser_feed import load_products_from_feed
+from app.db.save_to_db import save_to_db
 from loguru import logger
 
 def run_feed_job():

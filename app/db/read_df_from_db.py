@@ -1,6 +1,6 @@
 import time
 import pandas as pd
-from db import engine
+from db_engine import engine
 from loguru import logger
 
 def read_df_from_db():

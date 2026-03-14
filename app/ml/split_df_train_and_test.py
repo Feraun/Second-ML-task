@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 
 
-def difference_df_train_and_test(df):
+def split_df_train_and_test(df):
 
     x = df.drop(columns=["price"])
     y = df["price"]

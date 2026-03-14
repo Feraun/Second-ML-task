@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.job import  run_feed_job
+from app.jobs.download_and_load_df_to_db_job import  run_feed_job
 
 app = FastAPI()
 

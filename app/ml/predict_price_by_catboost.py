@@ -1,10 +1,15 @@
 from datetime import datetime
+from pathlib import Path
+
 import pandas as pd
 from catboost import CatBoostRegressor
 from sklearn.metrics import mean_squared_error
 import numpy as np
-from minio import S3BucketService
+from minio_service import S3BucketService
 
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+MODELS_DIR = BASE_DIR / "models"
 
 def predict_price_by_catboost(x_train, x_test, y_train, y_test, configs, s3service: S3BucketService):
 
@@ -12,6 +17,8 @@ def predict_price_by_catboost(x_train, x_test, y_train, y_test, configs, s3servi
 
     x_train[categorical] = x_train[categorical].fillna("unknown")
     x_test[categorical] = x_test[categorical].fillna("unknown")
+
+    MODELS_DIR.mkdir(exist_ok=True)
 
     results = []
 
@@ -39,9 +46,11 @@ def predict_price_by_catboost(x_train, x_test, y_train, y_test, configs, s3servi
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        model.save_model(f'catboost_{now}.cbm')
+        file_path = MODELS_DIR / f"catboost_{now}.cbm"
 
-        s3service.upload_file(f'catboost_{now}.cbm', f"catboost_{now}.cbm")
+        model.save_model(str(file_path))
+
+        s3service.upload_file(str(file_path), file_path.name)
 
 
     results_df = pd.DataFrame(results)

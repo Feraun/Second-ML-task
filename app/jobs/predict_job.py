@@ -1,15 +1,15 @@
 import time
 from typing import List
 
-from app.second.difference_df_train_and_test import difference_df_train_and_test
-from app.second.save_datasets import save_datasets
-from app.second.save_linear_regression_model import save_linear_regression_model
+from app.ml.split_df_train_and_test import split_df_train_and_test
+from app.minio.save_datasets import save_datasets
+from app.minio.save_linear_regression_model import save_linear_regression_model
 from config import *
 from loguru import logger
-from minio import S3BucketService
-from app.second.predict_price_by_catboost import predict_price_by_catboost
-from app.second.predict_price_by_linear_regression import predict_price_by_linear_regression
-from app.second.read_df_from_db import read_df_from_db
+from minio_service import S3BucketService
+from app.ml.predict_price_by_catboost import predict_price_by_catboost
+from app.ml.predict_price_by_linear_regression import predict_price_by_linear_regression
+from app.db.read_df_from_db import read_df_from_db
 
 def run_predict_job(configs: List):
 
@@ -24,7 +24,7 @@ def run_predict_job(configs: List):
 
     df = read_df_from_db()
 
-    x_train, x_test, y_train, y_test = difference_df_train_and_test(df)
+    x_train, x_test, y_train, y_test = split_df_train_and_test(df)
 
     pred_by_LR = predict_price_by_linear_regression(
         x_train, x_test, y_train, y_test

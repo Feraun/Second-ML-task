@@ -6,8 +6,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 import numpy as np
 
-from app.second.difference_df_train_and_test import difference_df_train_and_test
-from app.second.read_df_from_db import read_df_from_db
 
 def predict_price_by_linear_regression(
     x_train,
