@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 from catboost import CatBoostRegressor
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 import numpy as np
 from minio_service import S3BucketService
 
@@ -28,6 +28,7 @@ def predict_price_by_catboost(x_train, x_test, y_train, y_test, configs, s3servi
             depth=cfg["depth"],
             learning_rate=cfg["learning_rate"],
             loss_function="RMSE",
+            eval_metric="RMSE",
             verbose=False
         )
 
@@ -37,11 +38,17 @@ def predict_price_by_catboost(x_train, x_test, y_train, y_test, configs, s3servi
 
         rmse = np.sqrt(mean_squared_error(y_test, pred))
 
+        r2 = model.score(x_test, y_test)
+
+        mape = mean_absolute_percentage_error(y_test, pred)
+
         results.append({
             "iterations": cfg["iterations"],
             "depth": cfg["depth"],
             "learning_rate": cfg["learning_rate"],
-            "RMSE": rmse
+            "RMSE": rmse,
+            "R2": r2,
+            "MAPE": mape
         })
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")

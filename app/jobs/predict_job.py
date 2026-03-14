@@ -38,10 +38,10 @@ def run_predict_job(configs: List):
 
     duration = round(time.time() - start, 2)
 
-    save_linear_regression_model(pred_by_LR[1], service)
-    save_datasets(x_train, x_test, pred_by_LR[1], service)
+    save_linear_regression_model(pred_by_LR[3], service)
+    save_datasets(x_train, x_test, pred_by_LR[3], service)
 
     logger.info(f"Job was done in {duration} seconds")
 
-    print("LINEAR REGRESSION: ", pred_by_LR[0])
+    print("RMSE: ", pred_by_LR[0], "R2: ", pred_by_LR[1], "MAPE: ", pred_by_LR[2])
     print("CATBOOST REGRESSION: ", pred_by_cat)

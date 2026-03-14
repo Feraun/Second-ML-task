@@ -3,7 +3,7 @@ from sklearn.compose import make_column_transformer
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 import numpy as np
 
 
@@ -56,7 +56,10 @@ def predict_price_by_linear_regression(
 
     #корень из средней квадратичной ошибки
     rmse = np.sqrt(mean_squared_error(y_test, lr_pred))
-    return [rmse, lr_pipeline]
+    r2 = r2_score(y_test, lr_pred)
+    mape = mean_absolute_percentage_error(y_test, lr_pred)
+
+    return [rmse, r2, mape, lr_pipeline]
 
 # df = read_df_from_db()
 # x_train, x_test, y_train, y_test = difference_df_train_and_test(df)
