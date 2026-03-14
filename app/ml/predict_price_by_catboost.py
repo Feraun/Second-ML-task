@@ -5,7 +5,10 @@ import pandas as pd
 from catboost import CatBoostRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 import numpy as np
+
+from app.minio.save_catboost_model import save_catboost_model
 from minio_service import S3BucketService
+from save_model_info_to_db import save_model_info_to_db
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
@@ -21,6 +24,7 @@ def predict_price_by_catboost(x_train, x_test, y_train, y_test, configs, s3servi
     MODELS_DIR.mkdir(exist_ok=True)
 
     results = []
+    models = []
 
     for cfg in configs:
         model = CatBoostRegressor(
@@ -36,32 +40,32 @@ def predict_price_by_catboost(x_train, x_test, y_train, y_test, configs, s3servi
 
         pred = model.predict(x_test)
 
+        models.append(model)
+
         rmse = np.sqrt(mean_squared_error(y_test, pred))
 
         r2 = model.score(x_test, y_test)
 
         mape = mean_absolute_percentage_error(y_test, pred)
 
+        metrics = {"RMSE": rmse, "MAPE": mape, "R2": r2}
+
         results.append({
             "iterations": cfg["iterations"],
             "depth": cfg["depth"],
             "learning_rate": cfg["learning_rate"],
-            "RMSE": rmse,
-            "R2": r2,
-            "MAPE": mape
+            "metrics": {
+                "RMSE": rmse,
+                "MAPE": mape,
+                "R2": r2
+            }
         })
 
-        now = datetime.now().strftime("%Y%m%d-%H%M%S")
-
-        file_path = MODELS_DIR / f"catboost_{now}.cbm"
-
-        model.save_model(str(file_path))
-
-        s3service.upload_file(str(file_path), file_path.name)
+        save_catboost_model(model, metrics, s3service)
 
 
     results_df = pd.DataFrame(results)
 
     results_df.to_excel("model_configs.xlsx", index=False)
 
-    return results
+    return [results, models]

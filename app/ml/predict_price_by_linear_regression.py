@@ -6,12 +6,16 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 import numpy as np
 
+from app.minio.save_linear_regression_model import save_linear_regression_model
+from minio_service import S3BucketService
+
 
 def predict_price_by_linear_regression(
     x_train,
     x_test,
     y_train,
-    y_test):
+    y_test,
+    s3service: S3BucketService):
 
     #делаем столбец числовым
     x_train["Суммарная мощность"] = x_train["Суммарная мощность"].str.replace(r"[^\d.]", "", regex=True).astype(float)
@@ -54,12 +58,13 @@ def predict_price_by_linear_regression(
     # предсказанный массив цен
     lr_pred = lr_pipeline.predict(x_test)
 
-    #корень из средней квадратичной ошибки
-    rmse = np.sqrt(mean_squared_error(y_test, lr_pred))
-    r2 = r2_score(y_test, lr_pred)
-    mape = mean_absolute_percentage_error(y_test, lr_pred)
+    metrics = {"RMSE": np.sqrt(mean_squared_error(y_test, lr_pred)),
+               "R2": r2_score(y_test, lr_pred),
+               "MAPE": mean_absolute_percentage_error(y_test, lr_pred)}
 
-    return [rmse, r2, mape, lr_pipeline]
+    save_linear_regression_model(lr_pipeline, s3service, metrics)
+
+    return [metrics, lr_pipeline]
 
 # df = read_df_from_db()
 # x_train, x_test, y_train, y_test = difference_df_train_and_test(df)

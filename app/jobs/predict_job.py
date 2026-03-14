@@ -1,6 +1,7 @@
 import time
 from typing import List
 
+from app.minio.save_catboost_model import save_catboost_model
 from app.ml.split_df_train_and_test import split_df_train_and_test
 from app.minio.save_datasets import save_datasets
 from app.minio.save_linear_regression_model import save_linear_regression_model
@@ -27,7 +28,7 @@ def run_predict_job(configs: List):
     x_train, x_test, y_train, y_test = split_df_train_and_test(df)
 
     pred_by_LR = predict_price_by_linear_regression(
-        x_train, x_test, y_train, y_test
+        x_train, x_test, y_train, y_test, service
     )
 
     pred_by_cat = predict_price_by_catboost(
@@ -37,11 +38,9 @@ def run_predict_job(configs: List):
     )
 
     duration = round(time.time() - start, 2)
-
-    save_linear_regression_model(pred_by_LR[3], service)
-    save_datasets(x_train, x_test, pred_by_LR[3], service)
+    save_datasets(x_train, x_test, pred_by_LR[1], service)
 
     logger.info(f"Job was done in {duration} seconds")
 
-    print("RMSE: ", pred_by_LR[0], "R2: ", pred_by_LR[1], "MAPE: ", pred_by_LR[2])
-    print("CATBOOST REGRESSION: ", pred_by_cat)
+    print(pred_by_LR[0])
+    print("CATBOOST REGRESSION: ", pred_by_cat[0])
