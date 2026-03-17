@@ -1,8 +1,11 @@
+import os
 import tempfile
 
 import boto3
 import joblib
 from botocore.client import Config
+from catboost import CatBoostRegressor
+
 
 class S3BucketService:
 
@@ -37,16 +40,27 @@ class S3BucketService:
             Key=key
         )
 
-    def load_model_from_s3(self, s3_path: str):
+    def load_model_from_s3(self, s3_path: str, model_type: str):
 
-        with tempfile.NamedTemporaryFile() as tmp:
+        tmp = tempfile.NamedTemporaryFile(delete=False)
 
-            self.client.download_file(
-                self.bucket,
-                s3_path,
-                tmp.name
-            )
+        tmp.close()
+
+        self.client.download_file(
+            self.bucket,
+            s3_path,
+            tmp.name
+        )
+
+        if model_type == "CBM":
+
+            model = CatBoostRegressor()
+            model.load_model(tmp.name)
+
+        else:
 
             model = joblib.load(tmp.name)
+
+        os.remove(tmp.name)
 
         return model
