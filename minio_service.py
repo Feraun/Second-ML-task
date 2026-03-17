@@ -1,4 +1,7 @@
+import tempfile
+
 import boto3
+import joblib
 from botocore.client import Config
 
 class S3BucketService:
@@ -33,3 +36,17 @@ class S3BucketService:
             Bucket=self.bucket,
             Key=key
         )
+
+    def load_model_from_s3(self, s3_path: str):
+
+        with tempfile.NamedTemporaryFile() as tmp:
+
+            self.client.download_file(
+                self.bucket,
+                s3_path,
+                tmp.name
+            )
+
+            model = joblib.load(tmp.name)
+
+        return model
