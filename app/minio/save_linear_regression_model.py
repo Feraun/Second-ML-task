@@ -3,7 +3,7 @@ from datetime import datetime
 from minio_service import S3BucketService
 from pathlib import Path
 
-from save_model_info_to_db import save_model_info_to_db
+from app.db.models_table.save_model_info_to_db import save_model_info_to_db
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 MODELS_DIR = BASE_DIR / "models"

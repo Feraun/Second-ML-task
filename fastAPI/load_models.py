@@ -1,4 +1,4 @@
-from app.db.get_last_model import get_last_model
+from app.db.models_table.get_last_model import get_last_model
 
 regression_model = None
 catboost_model = None

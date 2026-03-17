@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -8,7 +7,6 @@ import numpy as np
 
 from app.minio.save_catboost_model import save_catboost_model
 from minio_service import S3BucketService
-from save_model_info_to_db import save_model_info_to_db
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 

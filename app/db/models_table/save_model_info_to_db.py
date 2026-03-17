@@ -1,6 +1,6 @@
 from db_engine import engine
 
-from create_models_table import models_table
+from app.db.models_table.create_models_table import models_table
 
 from datetime import datetime
 
