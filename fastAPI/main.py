@@ -3,8 +3,9 @@ from typing import Optional, Dict, List
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from fastAPI.load_models import load_models
-from fastAPI.predict_price import predict_prices
+import app.minio.load_models as lm
+from app.ml.predict_price import predict_prices
+from app.utils.prepare_df import prepare_df
 from fastAPI.train_api import router
 from minio_service import S3BucketService
 from config import *
@@ -22,8 +23,6 @@ service = S3BucketService(
 class Product(BaseModel):
     id: str
     name: str
-    vendor: Optional[str] = None
-    vendorCode: Optional[str] = None
     categoryId: Optional[int] = None
     price: Optional[float] = None
     params: Optional[Dict[str, str]] = None
@@ -33,15 +32,17 @@ class PredictRequest(BaseModel):
     use_catboost: bool = False
 
 
-@app.on_event("startup")
-def startup():
-    load_models(service)
-
 @app.post("/predict")
 def predict(req: PredictRequest):
 
+    lm.load_models(service)
+
+    df = prepare_df(req.products, lm.catboost_model if req.use_catboost else lm.regression_model)
+
+    print(df)
+
     preds = predict_prices(
-        req.products,
+        df,
         req.use_catboost
     )
 

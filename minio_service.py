@@ -41,26 +41,18 @@ class S3BucketService:
         )
 
     def load_model_from_s3(self, s3_path: str, model_type: str):
-
-        tmp = tempfile.NamedTemporaryFile(delete=False)
-
-        tmp.close()
-
+        #качаем файл с Minio
         self.client.download_file(
             self.bucket,
             s3_path,
-            tmp.name
+            s3_path
         )
 
+        #выбираем метод загрузки модели из файла
         if model_type == "CBM":
-
             model = CatBoostRegressor()
-            model.load_model(tmp.name)
-
+            model.load_model(s3_path)
         else:
-
-            model = joblib.load(tmp.name)
-
-        os.remove(tmp.name)
+            model = joblib.load(s3_path)
 
         return model
